@@ -38,12 +38,12 @@ jobs:
       run: echo "$GITHUB_CONTEXT"
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.BASELINE_USER_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.BASELINE_USER_SECRET_KEY }}
-        aws-region: eu-west-1
+#    - name: Configure aws credentials
+#      uses: aws-actions/configure-aws-credentials@v1
+#      with:
+#        aws-access-key-id: ${{ secrets.BASELINE_USER_ACCESS_KEY }}
+#        aws-secret-access-key: ${{ secrets.BASELINE_USER_SECRET_KEY }}
+#        aws-region: eu-west-1
 #    - name: Login to AWS ECR
 #      id: login-ecr
 #      uses: aws-actions/amazon-ecr-login@v1
