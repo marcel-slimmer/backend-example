@@ -40,7 +40,7 @@ service = ecs.Service('app-svc',
                       launch_type='FARGATE',
                       task_definition=task_definition.arn,
                       network_configuration=ecs.ServiceNetworkConfigurationArgs(
-                          assign_public_ip=False,
+                          assign_public_ip=True,
                           subnets=vpc.default_vpc_subnets.ids,
                           security_groups=[iam.group.id],
                       ),
