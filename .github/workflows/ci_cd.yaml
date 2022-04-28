@@ -4,6 +4,7 @@ on:
       - develop
       - main
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - develop
       - main
@@ -14,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
@@ -38,6 +41,8 @@ jobs:
       run: echo "$GITHUB_CONTEXT"
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 #    - name: Configure aws credentials
 #      uses: aws-actions/configure-aws-credentials@v1
 #      with:

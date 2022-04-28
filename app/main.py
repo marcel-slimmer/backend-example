@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import FastAPI
+from datetime import datetime
 
 app = FastAPI()
 
@@ -17,3 +18,9 @@ def read_item(item_id: int, q: Optional[str] = None):
 @app.get("/newfeature")
 def new_feature():
     return {"message": "New feature"}
+
+
+@app.get("/minute")
+def new_feature():
+    _now = datetime.now()
+    return {"result": _now.minute}
