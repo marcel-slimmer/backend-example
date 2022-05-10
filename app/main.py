@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 from fastapi import FastAPI
 from datetime import datetime
@@ -21,6 +22,12 @@ def new_feature():
 
 
 @app.get("/minute")
-def new_feature():
+def minute():
     _now = datetime.now()
     return {"result": _now.minute}
+
+
+@app.get("/wait")
+def wait():
+    time.sleep(5)
+    return {"message": "After 5s"}
