@@ -1,0 +1,38 @@
+version: '3'
+services:
+  docker:
+    image: docker:dind
+    container_name: docker
+    privileged: yes
+    volumes:
+      - certs:/certs/client
+    networks:
+      - pulumi-local-net
+
+  pulumi:
+    container_name: pulumi-local
+    build: .
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_TLS_VERIFY: 1
+      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_CERT_PATH: /certs/client
+      PULUMI_CONFIG_PASSPHRASE_FILE: /passphrase.txt
+    volumes:
+      - ${PWD}/certs/client:/certs/client/
+      - ${PWD}/certs/registry.crt:/usr/local/share/ca-certificate/ca.crt
+      - ${PWD}/../..:/app
+      - ${HOME}/.aws:/root/.aws
+      - ${HOME}/.pulumi/passphrase.txt:/passphrase.txt
+    working_dir: /app/IaC/ecs
+    networks:
+      - pulumi-local-net
+    depends_on:
+      - docker
+
+volumes:
+  certs:
+
+networks:
+  pulumi-local-net:
+    driver: bridge

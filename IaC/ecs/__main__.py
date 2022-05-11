@@ -1,5 +1,5 @@
 from pulumi import export, ResourceOptions, Output, Config
-from pulumi_aws import ecs, cloudwatch
+from pulumi_aws import ecs, cloudwatch, get_region
 import json
 
 import vpc
@@ -7,8 +7,7 @@ import iam
 import alb
 import ecr
 
-aws_config = Config('aws')
-aws_region = aws_config.require('region')
+current_region = get_region()
 
 # Create an ECS cluster to run a container-based service.
 cluster = ecs.Cluster('cluster',
@@ -30,8 +29,7 @@ task_definition = ecs.TaskDefinition('app-task',
                                      requires_compatibilities=['FARGATE'],
                                      execution_role_arn=iam.role.arn,
                                      container_definitions=Output.all(
-                                         ecr.api_image.image_name,
-                                         iam.ecs_ssm_parameter.arn).apply(lambda args: json.dumps([
+                                         ecr.api_image.image_name).apply(lambda args: json.dumps([
                                              {
                                                  'name': 'backend-app',
                                                  'image': args[0],
@@ -44,57 +42,11 @@ task_definition = ecs.TaskDefinition('app-task',
                                                      "logDriver": "awslogs",
                                                      "options": {
                                                          "awslogs-group": "ecs-log-group",
-                                                         "awslogs-region": aws_region,
+                                                         "awslogs-region": current_region.name,
                                                          "awslogs-stream-prefix": "app-task",
                                                      },
                                                  },
-                                                 "environment": [
-                                                     {
-                                                         "name": "NEW_RELIC_APP_NAME",
-                                                         "value": "backend-app"
-                                                     },
-                                                 ],
-                                                 "secrets": [
-                                                     {
-                                                         "valueFrom": args[1],
-                                                         "name": "NEW_RELIC_LICENSE_KEY"
-                                                     }
-                                                 ],
                                              },
-                                             {
-                                                 "environment": [
-                                                     {
-                                                         "name": "NRIA_OVERRIDE_HOST_ROOT",
-                                                         "value": ""
-                                                     },
-                                                     {
-                                                         "name": "NRIA_IS_FORWARD_ONLY",
-                                                         "value": "true"
-                                                     },
-                                                     {
-                                                         "name": "FARGATE",
-                                                         "value": "true"
-                                                     },
-                                                     {
-                                                         "name": "NRIA_PASSTHROUGH_ENVIRONMENT",
-                                                         "value": "ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE"
-                                                     },
-                                                     {
-                                                         "name": "NRIA_CUSTOM_ATTRIBUTES",
-                                                         "value": "{\"nrDeployMethod\":\"downloadPage\"}"
-                                                     }
-                                                 ],
-                                                 "secrets": [
-                                                     {
-                                                         "valueFrom": args[1],
-                                                         "name": "NRIA_LICENSE_KEY"
-                                                     }
-                                                 ],
-                                                 "cpu": 256,
-                                                 "memoryReservation": 512,
-                                                 "image": "newrelic/nri-ecs:1.8.0",
-                                                 "name": "newrelic-infra"
-                                             }
                                          ])
                                      ))
 

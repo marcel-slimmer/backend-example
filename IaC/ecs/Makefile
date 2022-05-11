@@ -1,32 +1,26 @@
-.PHONY: run-quiz
+.PHONY: help init deploy provision destroy rmstack
 .SILENT: ;
 .DEFAULT_GOAL := help
 
 GIT_SHA:=$(shell git rev-parse --short HEAD)
 AWS_PROFILE:=default
+PULUMI_STATE_URL:=s3://pulumi-state-manager
+PULUMI_STACK_NAME:=ecs-baseline-dev
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 init: ## Start pulumi environment
-	pulumi login --local
-	pulumi stack init ecs-baseline-dev
-	pulumi config set aws:profile $(AWS_PROFILE)
+	test -s $${HOME}/.pulumi/passphrase.txt || read -s -p "Enter Password for pulumi: " my_password && echo $${my_password} > $${HOME}/.pulumi/passphrase.txt
+	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi login $(PULUMI_STATE_URL) && pulumi stack init $(PULUMI_STACK_NAME)"
 
-deploy: provision exportconfig ## Deploy with -y
+deploy: provision ## Deploy with -y
 
 provision: ## Provision AWS Infra using Pulumi with -y
-	pulumi up -y
-
-exportconfig: ## Exports the kubernetes config
-	gh secret set ECR_REPO_URL --body "$$(pulumi stack output --show-secrets ECR_REPO_URL)"
-	gh secret set ECR_REPO_NAME --body "$$(pulumi stack output --show-secrets ECR_REPO_NAME)"
-	gh secret set ECS_CLUSTER_NAME --body "$$(pulumi stack output --show-secrets ECS_CLUSTER_NAME)"
-	gh secret set ECS_SERVICE_NAME --body "$$(pulumi stack output --show-secrets ECS_SERVICE_NAME)"
-	gh secret set URL --body "$$(pulumi stack output --show-secrets URL)"
+	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi login $(PULUMI_STATE_URL) && pulumi stack select $(PULUMI_STACK_NAME) && pulumi up -y"
 
 destroy: ## Destroy with -y
-	pulumi destroy -y
+	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi login $(PULUMI_STATE_URL) && pulumi stack select $(PULUMI_STACK_NAME) && pulumi destroy -y"
 
 rmstack: ## Remove stack with -y
-	pulumi stack rm -y
+	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi login $(PULUMI_STATE_URL) && pulumi stack select $(PULUMI_STACK_NAME) && pulumi stack rm -y"
