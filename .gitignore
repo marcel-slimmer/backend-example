@@ -1,3 +1,5 @@
 /.idea/
 /venv/
 /IaC/ecs/Pulumi.ecs-baseline-dev.yaml
+**/__pycache__/**
+**/IaC/**/certs

@@ -2,8 +2,6 @@ name: backend-example-ecs
 description: A container running in AWS ECS Fargate, using Python infrastructure as code
 runtime:
   name: python
-  options:
-    virtualenv: ../../venv
 template:
   config:
     aws:

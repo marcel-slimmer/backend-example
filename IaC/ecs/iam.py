@@ -1,8 +1,8 @@
-from pulumi_aws import ec2, iam
+from pulumi import Config, Output
+from pulumi_aws import ec2, iam, ssm
 import json
 
 import vpc
-
 
 # Create a SecurityGroup that permits HTTP ingress and unrestricted egress.
 group = ec2.SecurityGroup('web-secgrp',

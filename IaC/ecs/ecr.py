@@ -45,10 +45,14 @@ ecr_lc_policy = ecr.LifecyclePolicy("policy-baseline-example",
 image_name = ecr_repo.repository_url
 registry_info = ecr_repo.registry_id.apply(get_registry_info)
 
+build_args = docker.DockerBuild(
+    context="../../",
+    env={"DOCKER_BUILDKIT": "1"}
+)
 
 api_image = docker.Image("api_docker_image",
                          image_name=image_name,
-                         build="../../",
+                         build=build_args,
                          skip_push=False,
                          registry=registry_info,
                          opts=ResourceOptions(depends_on=[ecr_repo]),
