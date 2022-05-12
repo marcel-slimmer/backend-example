@@ -5,7 +5,7 @@ services:
     container_name: docker
     privileged: yes
     volumes:
-      - certs:/certs/client
+      - ${PWD}/certs/client:/certs/client
     networks:
       - pulumi-local-net
 

@@ -14,6 +14,10 @@ init: ## Start pulumi environment
 	test -s $${HOME}/.pulumi/passphrase.txt || read -s -p "Enter Password for pulumi: " my_password && echo $${my_password} > $${HOME}/.pulumi/passphrase.txt
 	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi login $(PULUMI_STATE_URL) && pulumi stack init $(PULUMI_STACK_NAME)"
 
+addpylib: ## Rebuild after add lib in requirements.txt
+	docker-compose kill
+	docker-compose build --no-cache pulumi
+
 deploy: provision ## Deploy with -y
 
 provision: ## Provision AWS Infra using Pulumi with -y
@@ -24,3 +28,6 @@ destroy: ## Destroy with -y
 
 rmstack: ## Remove stack with -y
 	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi login $(PULUMI_STATE_URL) && pulumi stack select $(PULUMI_STACK_NAME) && pulumi stack rm -y"
+
+check: ## Remove stack with -y
+	docker-compose run --name pulumi-local --entrypoint bash --rm pulumi -c "pulumi version"
